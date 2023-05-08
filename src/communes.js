@@ -71,9 +71,9 @@ function styleCommunes(feature) {
     const currentZoomLevel = map.getZoom();
     return {
         fillColor: currentZoomLevel >= 13 ? 'transparent' : 'red',
-        weight: 2,
+        weight: currentZoomLevel >= 13 ? 4 : 2,
         opacity: 0.8,
-        color: 'white',
+        color: currentZoomLevel >= 13 ? 'red' : 'white',
         dashArray: '',
         fillOpacity: 0.2
     };
@@ -94,8 +94,8 @@ function highlightFeatureCommunes(e) {
     let layer = e.target;
     const currentZoomLevel = map.getZoom();
     layer.setStyle({
-        weight: 3,
-        color: '#fff',
+        weight: currentZoomLevel >= 13 ? 4 : 3,
+        color: currentZoomLevel >= 13 ? 'red' : 'white',
         opacity: 1,
         dashArray: '',
         fillOpacity: 0.5,
@@ -122,9 +122,9 @@ function resetHighlightCommunes(e) {
     const currentZoomLevel = map.getZoom();
     e.target.setStyle({
         fillColor: currentZoomLevel >= 13 ? 'transparent' : 'red',
-        weight: 2,
+        weight: currentZoomLevel >= 13 ? 4 : 2,
         opacity: 0.7,
-        color: 'white',
+        color: currentZoomLevel >= 13 ? 'red' : 'white',
         dashArray: '',
         fillOpacity: 0.2
     });
