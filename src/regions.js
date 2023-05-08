@@ -56,6 +56,9 @@ function resetHighlight(e) {
 function zoomToFeatureRegion(e) {
     map.fitBounds(e.target.getBounds());
 
+    let panneauComm = document.getElementById('panneau-communes');
+    panneauComm.classList.remove('down');
+
     const regionName = e.target.feature.properties.NOM_REG_M;
     const inseeReg = e.target.feature.properties.INSEE_REG
 

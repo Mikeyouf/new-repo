@@ -163,6 +163,11 @@ function displayCommuneInfo(commune) {
     let titreComm = document.getElementById('nom-comm');
     let communeInfoDiv = document.getElementById('commune-info');
 
+    let croixElt = document.getElementById('croix');
+    croixElt.addEventListener('click', function() {
+        panneauComm.classList.remove('down');
+    });
+
     communeInfoDiv.innerHTML = '';
 
     // Créez un tableau avec les noms des propriétés à exclure
