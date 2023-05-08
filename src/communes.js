@@ -256,6 +256,7 @@ async function showCommunesList(regionCode, departmentINSEE, departmentName) {
                 return commune.properties.INSEE_COM === selectedINSEE_COM;
             });
             map.fitBounds(L.geoJSON(selectedCommune).getBounds());
+            displayCommuneInfo(selectedCommune)
         });
 
         communeList.appendChild(communeDropdown);
