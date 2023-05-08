@@ -67,6 +67,9 @@ function zoomToFeatureDepartement(e) {
     const layer = e.target;
     map.fitBounds(layer.getBounds());
 
+    let panneauComm = document.getElementById('panneau-communes');
+    panneauComm.classList.remove('down');
+
     const departmentINSEE = layer.feature.properties.INSEE_DEP;
     const departmentName = layer.feature.properties.NOM_DEP_M;
     const regionINSEE = layer.feature.properties.INSEE_REG;
@@ -130,7 +133,7 @@ async function showDepartmentsList(regionINSEE, regionName) {
     contenaireDiv.innerHTML = '';
 
     const titre = document.createElement('h3');
-    titre.textContent = `Liste des départements - ${regionName}`;
+    titre.textContent = `Liste des départements ${regionName}`;
 
     contenaireDiv.appendChild(titre);
 

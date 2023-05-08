@@ -74,7 +74,10 @@ function onEachFeatureCommunes(feature, layer) {
     layer.on({
         mouseover: highlightFeatureCommunes,
         mouseout: resetHighlightCommunes,
-        click: zoomToFeatureCommunes
+        click: (e) => {
+            zoomToFeatureCommunes(e);
+            displayCommuneInfo(feature);
+        },
     });
 }
 
@@ -143,6 +146,47 @@ async function getMayaneCommunes(depINSEE) {
     return mayaneCommunes;
 }
 
+// On récupère les infos de la commune choisie
+function displayCommuneInfo(commune) {
+    let panneauComm = document.getElementById('panneau-communes');
+    panneauComm.classList.add('down');
+    let titreComm = document.getElementById('nom-comm');
+    let communeInfoDiv = document.getElementById('commune-info');
+
+    communeInfoDiv.innerHTML = '';
+
+    // Créez un tableau avec les noms des propriétés à exclure
+    const propertiesToExclude = ['fid', 'COMMUNE_MAYANE', 'NOM_COM_M', 'INSEE_COM', 'INSEE_DEP', 'INSEE_REG'];
+
+    // Affectez la valeur de la propriété 'NOM_COM_M' au titre h3
+    titreComm.textContent = commune.properties.NOM_COM_M;
+
+    // Parcourir toutes les propriétés de la commune
+    for (const property in commune.properties) {
+        // Vérifiez si la propriété en cours doit être exclue
+        if (!propertiesToExclude.includes(property)) {
+            // Créer un élément HTML pour afficher la propriété
+            const propertySpan = document.createElement('span');
+            propertySpan.textContent = `${property}: `;
+            propertySpan.classList.add('property-name'); // Ajoutez la classe CSS pour styliser la propriété
+
+            // Créer un élément HTML pour afficher la valeur
+            const valueSpan = document.createElement('span');
+            valueSpan.textContent = `${commune.properties[property]}`;
+
+            // Créer un élément <p> pour contenir la propriété et la valeur
+            const propertyDiv = document.createElement('p');
+            propertyDiv.classList.add('info-column'); // Ajoutez la classe info-column pour les colonnes
+            propertyDiv.appendChild(propertySpan);
+            propertyDiv.appendChild(valueSpan);
+
+            // Ajouter l'élément HTML au panneau latéral droit
+            communeInfoDiv.appendChild(propertyDiv);
+        }
+    }
+
+}
+
 async function showCommunesList(regionCode, departmentINSEE, departmentName) {
     // Supprimer la couche de communes actuelle
     if (geoJSONLayerCommune) {
@@ -158,9 +202,14 @@ async function showCommunesList(regionCode, departmentINSEE, departmentName) {
     contenaireDiv.innerHTML = '';
 
     const titre = document.createElement('h3');
-    titre.textContent = `Liste des communes - ${departmentName}`;
+    titre.textContent = `Liste des communes`;
 
     contenaireDiv.appendChild(titre);
+
+    const subtitle = document.createElement('h3');
+    subtitle.textContent = `${departmentName}`;
+
+    contenaireDiv.appendChild(subtitle);
 
     const communeList = document.createElement('ul');
     communeList.className = 'list-group';
@@ -218,6 +267,7 @@ async function showCommunesList(regionCode, departmentINSEE, departmentName) {
 
             communeListItem.addEventListener('click', () => {
                 map.fitBounds(L.geoJSON(commune).getBounds());
+                displayCommuneInfo(commune);
             });
 
             communeList.appendChild(communeListItem);

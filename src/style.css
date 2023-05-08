@@ -9,7 +9,7 @@ body {
 #panneau-lateral-droit {
     position: absolute;
     top: 10%;
-    right: -336px;
+    right: -352px;
     width: 320px;
     height: 80vh;
     z-index: 999;
@@ -21,7 +21,7 @@ body {
     display: flex;
     justify-content: center;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
-    padding: 8px;
+    padding: 8px 16px;
 }
 
 #panneau-lateral-droit.show {
@@ -32,6 +32,51 @@ body {
 #panneau-lateral-droit h3 {
     text-align: center;
     color: #3F89B6;
+}
+
+#panneau-communes {
+    position: absolute;
+    top: -80vh;
+    right: 440px;
+    width: 70vw;
+    z-index: 999;
+    background-color: #ffffff;
+    border-bottom: 6px solid #3F89B6;
+    border-radius: 0 4px 4px 0;
+    transition: all 0.3s ease-in;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    padding: 8px 16px;
+}
+
+#panneau-communes.down {
+    top: 0;
+    transition: all 0.3s ease-in;
+}
+
+#panneau-communes h3 {
+    text-align: center;
+    color: #3F89B6;
+}
+
+#panneau-communes .info-column {
+    display: inline-block;
+    width: 30%;
+    /* Ajustez la largeur en fonction de la place disponible */
+    vertical-align: top;
+    margin: 4px 1%;
+}
+
+#panneau-communes .property-name {
+    font-weight: bold;
+    color: #3F89B6;
+}
+
+#commune-info {
+    border-top: 1px solid #3F89B6;
+    padding-top: 8px;
 }
 
 #bouton {

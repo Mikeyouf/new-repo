@@ -191,6 +191,8 @@ function returnRegionsShow(button, geoJSONLayerRegion, geoJSONLayerDepartement) 
         houseDivElt.classList.toggle('show');
         const contenaireDiv = document.getElementById('contenaire');
         contenaireDiv.innerHTML = '';
+        let panneauComm = document.getElementById('panneau-communes');
+        panneauComm.classList.remove('down');
     });
 }
 
