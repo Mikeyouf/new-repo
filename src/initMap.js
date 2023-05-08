@@ -97,6 +97,7 @@ async function initMap() {
         // Déplacer la couche des régions en arrière-plan lorsque la carte est initialisée
         // geoJSONLayerRegion.bringToBack();
         geoJSONLayerRegion.setZIndex(1);
+
     }
 
     return map;

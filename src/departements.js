@@ -5,9 +5,19 @@ import { returnRegionsShow } from './utilitaire';
 import { showCommunesList, geoJSONLayerCommune } from './communes';
 import departementsData from './data/departementsData.geojson';
 
+// On prend le niveau de zoom
+function getCurrentZoom() {
+    map.on('zoomend', function() {
+        geoJSONLayerCommune.eachLayer(function(layer) {
+            layer.setStyle(styleDepartements(layer.feature));
+        });
+    });
+}
+
 function styleDepartements(feature) {
+    const currentZoomLevel = map.getZoom();
     return {
-        fillColor: 'yellow',
+        fillColor: currentZoomLevel >= 13 ? 'transparent' : 'yellow',
         weight: 2,
         opacity: 0.8,
         color: 'white',
@@ -25,7 +35,8 @@ function onEachFeatureDepartements(feature, layer) {
 }
 
 function highlightFeatureDepartement(e) {
-    var layer = e.target;
+    let layer = e.target;
+    const currentZoomLevel = map.getZoom();
 
     layer.setStyle({
         weight: 3,
@@ -33,7 +44,7 @@ function highlightFeatureDepartement(e) {
         opacity: 1,
         dashArray: '',
         fillOpacity: 0.5,
-        fillColor: 'yellow',
+        fillColor: currentZoomLevel >= 13 ? 'transparent' : 'yellow',
     });
 
     geoJSONLayerRegion.setStyle({
@@ -53,8 +64,9 @@ function highlightFeatureDepartement(e) {
 }
 
 function resetHighlightDepartement(e) {
+    const currentZoomLevel = map.getZoom();
     e.target.setStyle({
-        fillColor: 'yellow',
+        fillColor: currentZoomLevel >= 13 ? 'transparent' : 'yellow',
         weight: 2,
         opacity: 0.7,
         color: 'white',
@@ -114,6 +126,7 @@ async function getMayaneDepartments(regionINSEE, forceUpdate = false) {
     geoJSONLayerRegion.setZIndex(1);
     geoJSONLayerDepartement.setZIndex(2); // Définit l'indice Z de la couche de départements à 2
     geoJSONLayerCommune.setZIndex(3); // Définit l'indice Z de la couche de communes à 3
+    getCurrentZoom();
 
     return geoJSONLayerDepartement;
 }

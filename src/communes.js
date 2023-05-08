@@ -58,10 +58,19 @@ async function loadCommunes(regionCode) {
     return filteredCommunes;
 }
 
+// On prend le niveau de zoom
+function getCurrentZoom() {
+    map.on('zoomend', function() {
+        geoJSONLayerCommune.eachLayer(function(layer) {
+            layer.setStyle(styleCommunes(layer.feature));
+        });
+    });
+}
 
 function styleCommunes(feature) {
+    const currentZoomLevel = map.getZoom();
     return {
-        fillColor: 'red',
+        fillColor: currentZoomLevel >= 13 ? 'transparent' : 'red',
         weight: 2,
         opacity: 0.8,
         color: 'white',
@@ -82,15 +91,15 @@ function onEachFeatureCommunes(feature, layer) {
 }
 
 function highlightFeatureCommunes(e) {
-    var layer = e.target;
-
+    let layer = e.target;
+    const currentZoomLevel = map.getZoom();
     layer.setStyle({
         weight: 3,
         color: '#fff',
         opacity: 1,
         dashArray: '',
         fillOpacity: 0.5,
-        fillColor: 'red',
+        fillColor: currentZoomLevel >= 13 ? 'transparent' : 'red',
     });
 
     geoJSONLayerDepartement.setStyle({
@@ -110,8 +119,9 @@ function highlightFeatureCommunes(e) {
 }
 
 function resetHighlightCommunes(e) {
+    const currentZoomLevel = map.getZoom();
     e.target.setStyle({
-        fillColor: 'red',
+        fillColor: currentZoomLevel >= 13 ? 'transparent' : 'red',
         weight: 2,
         opacity: 0.7,
         color: 'white',
@@ -230,6 +240,8 @@ async function showCommunesList(regionCode, departmentINSEE, departmentName) {
 
     geoJSONLayerDepartement.setZIndex(2); // Définit l'indice Z de la couche de départements à 2
     geoJSONLayerCommune.setZIndex(3); // Définit l'indice Z de la couche de communes à 3
+    // Appeler la fonction getCurrentZoom pour mettre à jour le style des communes en fonction du niveau de zoom
+    getCurrentZoom();
 
     const communeCount = communesByDepartment.length;
 
