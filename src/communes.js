@@ -168,38 +168,87 @@ function displayCommuneInfo(commune) {
         panneauComm.classList.remove('down');
     });
 
-    communeInfoDiv.innerHTML = '';
-
     // Créez un tableau avec les noms des propriétés à exclure
-    const propertiesToExclude = ['fid', 'COMMUNE_MAYANE', 'NOM_COM_M', 'INSEE_COM', 'INSEE_DEP', 'INSEE_REG'];
+    const propertiesToExclude = ['fid', 'COMMUNE_MAYANE', 'NOM_COM_M', 'INSEE_COM', 'INSEE_DEP', 'INSEE_REG', 'Nature', 'total_pop_mun_EPCI'];
 
-    // Affectez la valeur de la propriété 'NOM_COM_M' au titre h3
-    titreComm.textContent = commune.properties.NOM_COM_M;
+    const propertyDisplayNames = {
+        "Date_réalisation_PCS_Mayane": "Date de réalisation du PCS",
+        "Referent": "Référent",
+        "Nb_communes_membres": "Nombre de communes membres",
+        "Nom_EPCI_fp": "Nom EPCI",
+        "pmun_2022_comm": "Population municipale 2022",
+        "mail": "E-mail",
+    };
 
-    // Parcourir toutes les propriétés de la commune
-    for (const property in commune.properties) {
-        // Vérifiez si la propriété en cours doit être exclue
-        if (!propertiesToExclude.includes(property)) {
-            // Créer un élément HTML pour afficher la propriété
-            const propertySpan = document.createElement('span');
-            propertySpan.textContent = `${property}: `;
-            propertySpan.classList.add('property-name'); // Ajoutez la classe CSS pour styliser la propriété
+    const columnAssignments = {
+        "pmun_2022_comm": "column-1",
+        "Date_réalisation_PCS_Mayane": "column-1",
+        "Nb_communes_membres": "column-1",
+        "Nom_EPCI_fp": "column-1",
+        "PCS": "column-2",
+        "DICRIM": "column-2",
+        "Exercice": "column-2",
+        "Referent": "column-3",
+        "Téléphone": "column-3",
+        "mail": "column-3",
+    };
 
-            // Créer un élément HTML pour afficher la valeur
-            const valueSpan = document.createElement('span');
-            valueSpan.textContent = `${commune.properties[property]}`;
-
-            // Créer un élément <p> pour contenir la propriété et la valeur
-            const propertyDiv = document.createElement('p');
-            propertyDiv.classList.add('info-column'); // Ajoutez la classe info-column pour les colonnes
-            propertyDiv.appendChild(propertySpan);
-            propertyDiv.appendChild(valueSpan);
-
-            // Ajouter l'élément HTML au panneau latéral droit
-            communeInfoDiv.appendChild(propertyDiv);
+    // Supprimer le contenu de chaque div de colonne
+    for (const columnId of Object.values(columnAssignments)) {
+        const columnDiv = document.getElementById(columnId);
+        if (columnDiv) {
+            columnDiv.innerHTML = '';
         }
     }
 
+    // Affectez la valeur de la propriété 'NOM_COM_M' au titre h3
+    titreComm.textContent = commune.properties.NOM_COM_M;
+    let propertyOrder = Object.keys(columnAssignments);
+
+    // Parcourir toutes les propriétés de la commune
+    for (const property of propertyOrder) {
+        // Vérifiez si la propriété en cours doit être exclue
+        if (!propertiesToExclude.includes(property)) {
+            // Vérifiez si la propriété existe dans la commune
+            if (commune.properties.hasOwnProperty(property)) {
+                const columnId = columnAssignments[property];
+                if (!columnId) continue; // Si la propriété n'est pas assignée à une colonne, ignorez-la
+
+                const columnDiv = document.getElementById(columnId);
+                if (!columnDiv) continue; // Si l'ID de la colonne n'est pas valide, ignorez-la
+
+                // Si la propriété est TRUE, on affiche juste la propriété sans les deux points (":") et sans la valeur
+                if (commune.properties[property] === "TRUE") {
+                    const propertyDiv = document.createElement('p');
+                    const propertySpan = document.createElement('span');
+                    propertySpan.classList.add('property-name');
+                    propertySpan.textContent = propertyDisplayNames[property] || property;
+                    propertyDiv.appendChild(propertySpan);
+                    // Ajouter l'élément HTML à la colonne appropriée
+                    columnDiv.appendChild(propertyDiv);
+                }
+                // Si la propriété n'est ni TRUE ni FALSE, on affiche la propriété avec les deux points (":") et la valeur
+                else if (commune.properties[property] !== "FALSE") {
+                    // Créer un élément HTML pour afficher la propriété
+                    const propertySpan = document.createElement('span');
+                    propertySpan.textContent = `${propertyDisplayNames[property] || property}: `;
+                    propertySpan.classList.add('property-name');
+
+                    // Créer un élément HTML pour afficher la valeur
+                    const valueSpan = document.createElement('span');
+                    valueSpan.textContent = `${commune.properties[property]}`;
+
+                    // Créer un élément <p> pour contenir la propriété et la valeur
+                    const propertyDiv = document.createElement('p');
+                    propertyDiv.appendChild(propertySpan);
+                    propertyDiv.appendChild(valueSpan);
+
+                    // Ajouter l'élément HTML à la colonne appropriée
+                    columnDiv.appendChild(propertyDiv);
+                }
+            }
+        }
+    }
 }
 
 async function showCommunesList(regionCode, departmentINSEE, departmentName) {
