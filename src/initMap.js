@@ -102,10 +102,10 @@ async function initMap() {
             documentTitle: 'Carte Mayane',
             closePopupsOnPrint: false,
             printModes: [
-                L.BrowserPrint.Mode.Landscape("Tabloid", { title: "Tabloid Landscape" }),
-                L.BrowserPrint.Mode.Portrait("A4", { title: "A4 Portrait" }),
-                L.BrowserPrint.Mode.Auto("B4", { title: "Auto" }),
-                L.BrowserPrint.Mode.Custom("B5", { title: "Select area" })
+                L.BrowserPrint.Mode.Landscape("Tabloid", { title: "Paysage" }),
+                L.BrowserPrint.Mode.Portrait("A4", { title: "Portrait" }),
+                L.BrowserPrint.Mode.Auto("A4", { title: "Auto" }),
+                L.BrowserPrint.Mode.Custom("A4", { title: "Sélection" })
             ],
             manualMode: false
         }).addTo(map);
@@ -119,7 +119,7 @@ async function initMap() {
             position: 'topleft', // position of take screen icon
             screenName: 'screenshot', // string or function
             mimeType: 'image/jpeg', // used if format == image,
-            caption: 'My custom caption', // string or function, added caption to bottom of screen
+            caption: 'Carte Mayane', // string or function, added caption to bottom of screen
             captionFontSize: 15,
             captionFont: 'Arial',
             captionColor: 'black',
