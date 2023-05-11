@@ -3,6 +3,8 @@ import { showRegionsList } from './regions.js';
 import { map } from './initMap';
 import { isConnected } from './admin.js';
 import fetch from 'node-fetch';
+// import leafletImage from 'leaflet-image';
+// import html2canvas from 'html2canvas';
 
 // import fs from 'fs';
 // import { pipeline, Readable } from 'stream';
@@ -195,6 +197,21 @@ function returnRegionsShow(button, geoJSONLayerRegion, geoJSONLayerDepartement) 
         panneauComm.classList.remove('down');
     });
 }
+
+// créer une image de la carte
+// const boutonMap = document.getElementById('export');
+// boutonMap.addEventListener('click', function() {
+//     html2canvas(document.getElementById('map')).then(function(canvas) {
+//         var link = document.createElement('a');
+//         link.href = canvas.toDataURL();
+//         link.download = 'map.png';
+//         link.style.display = 'none'; // rendre le lien invisible
+
+//         document.body.appendChild(link);
+//         link.click(); // déclenche le téléchargement
+//         document.body.removeChild(link); // supprime le lien du DOM
+//     });
+// });
 
 export {
     addRegionsToFirestore,

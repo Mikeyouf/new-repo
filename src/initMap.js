@@ -4,6 +4,8 @@ import L from 'leaflet';
 import regionsData from './data/regionsData.geojson';
 import * as regions from './regions.js';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import 'leaflet.browser.print/dist/leaflet.browser.print.js';
+import 'leaflet-simple-map-screenshoter';
 
 let isMobile;
 
@@ -94,6 +96,41 @@ async function initMap() {
 
         // Ajouter la couche des régions sur la carte
         map.addLayer(geoJSONLayerRegion);
+        // Ajouter un bouton d'impression
+        L.control.browserPrint({
+            title: 'Imprimer la carte',
+            documentTitle: 'Carte Mayane',
+            closePopupsOnPrint: false,
+            printModes: [
+                L.BrowserPrint.Mode.Landscape("Tabloid", { title: "Tabloid Landscape" }),
+                L.BrowserPrint.Mode.Portrait("A4", { title: "A4 Portrait" }),
+                L.BrowserPrint.Mode.Auto("B4", { title: "Auto" }),
+                L.BrowserPrint.Mode.Custom("B5", { title: "Select area" })
+            ],
+            manualMode: false
+        }).addTo(map);
+
+        let pluginOptions = {
+            cropImageByInnerWH: true, // crop blank opacity from image borders
+            preventDownload: false, // prevent download on button click
+            domtoimageOptions: {
+                quality: 1 // increase quality of image
+            },
+            position: 'topleft', // position of take screen icon
+            screenName: 'screenshot', // string or function
+            mimeType: 'image/jpeg', // used if format == image,
+            caption: 'My custom caption', // string or function, added caption to bottom of screen
+            captionFontSize: 15,
+            captionFont: 'Arial',
+            captionColor: 'black',
+            captionBgColor: 'white',
+            captionOffset: 5,
+        }
+
+        L.simpleMapScreenshoter(pluginOptions).addTo(map);
+
+
+
         // Déplacer la couche des régions en arrière-plan lorsque la carte est initialisée
         // geoJSONLayerRegion.bringToBack();
         geoJSONLayerRegion.setZIndex(1);
