@@ -4,7 +4,7 @@ import L from 'leaflet';
 import regionsData from './data/regionsData.geojson';
 import * as regions from './regions.js';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
-import 'leaflet.browser.print/dist/leaflet.browser.print.js';
+// import 'leaflet.browser.print/dist/leaflet.browser.print.js';
 import 'leaflet-simple-map-screenshoter';
 
 let isMobile;
@@ -97,18 +97,18 @@ async function initMap() {
         // Ajouter la couche des régions sur la carte
         map.addLayer(geoJSONLayerRegion);
         // Ajouter un bouton d'impression
-        L.control.browserPrint({
-            title: 'Imprimer la carte',
-            documentTitle: 'Carte Mayane',
-            closePopupsOnPrint: false,
-            printModes: [
-                L.BrowserPrint.Mode.Landscape("Tabloid", { title: "Paysage" }),
-                L.BrowserPrint.Mode.Portrait("A4", { title: "Portrait" }),
-                L.BrowserPrint.Mode.Auto("A4", { title: "Auto" }),
-                L.BrowserPrint.Mode.Custom("A4", { title: "Sélection" })
-            ],
-            manualMode: false
-        }).addTo(map);
+        // L.control.browserPrint({
+        //     title: 'Imprimer la carte',
+        //     documentTitle: 'Carte Mayane',
+        //     closePopupsOnPrint: false,
+        //     printModes: [
+        //         L.BrowserPrint.Mode.Landscape("Tabloid", { title: "Paysage" }),
+        //         L.BrowserPrint.Mode.Portrait("A4", { title: "Portrait" }),
+        //         L.BrowserPrint.Mode.Auto("A4", { title: "Auto" }),
+        //         L.BrowserPrint.Mode.Custom("A4", { title: "Sélection" })
+        //     ],
+        //     manualMode: false
+        // }).addTo(map);
 
         let pluginOptions = {
             cropImageByInnerWH: true, // crop blank opacity from image borders
@@ -128,8 +128,6 @@ async function initMap() {
         }
 
         L.simpleMapScreenshoter(pluginOptions).addTo(map);
-
-
 
         // Déplacer la couche des régions en arrière-plan lorsque la carte est initialisée
         // geoJSONLayerRegion.bringToBack();

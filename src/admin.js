@@ -1,11 +1,13 @@
-import { geoJSONLayerRegion, getMayaneRegions } from './initMap';
+import { geoJSONLayerRegion, getMayaneRegions, map } from './initMap';
 import { collection, getDocs, getFirestore, updateDoc, doc, getDoc, query, where } from 'firebase/firestore';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import firebase from './firebase.js';
 import { showRegionsList } from './regions.js';
 import { getMayaneDepartments, geoJSONLayerDepartement } from './departements.js';
+import { getMayaneCommunes, loadCommunes, getCurrentZoom, onEachFeatureCommunes, styleCommunes } from './communes.js';
 import regionsData from './data/regionsData.geojson';
 
+let geoJSONLayerCommune = L.geoJSON();
 let isConnected = false;
 // connexion à firebase par identification
 const connexionToFirebase = () => {
@@ -236,6 +238,9 @@ const showDepartmentInfo = async(selectedDepartmentId, departmentsRef, contenair
 
             // Mettre à jour l'affichage des départements sur la carte
             await getMayaneDepartments(selectedRegionInsee, true);
+            // console.log(selectedDepartment.INSEE_DEP);
+            await getMayaneCommunes(selectedDepartment.INSEE_DEP);
+
 
         } catch (error) {
             console.error("Erreur lors de l'enregistrement des modifications", error);
@@ -254,7 +259,7 @@ const showDepartmentInfo = async(selectedDepartmentId, departmentsRef, contenair
 // Fonction pour afficher les départements en sous-menu des régions respectives
 const showDepartmentsListAdmin = async(regionInsee) => {
     const departments = await getDepartmentsByRegion(regionInsee);
-
+    // console.log(regionInsee);
     // Créer un sous-menu pour les départements
     const select = document.createElement("select");
     select.className = "form-select form-select-sm mb-3";
@@ -276,6 +281,8 @@ const showDepartmentsListAdmin = async(regionInsee) => {
 
     // Ajouter un écouteur d'événement "change" à la balise select
     select.addEventListener("change", async(event) => {
+        // on récupère le zoom
+        getCurrentZoom();
         // Récupérer l'ID du département sélectionné
         const selectedDepartmentId = event.target.value;
 
@@ -286,7 +293,24 @@ const showDepartmentsListAdmin = async(regionInsee) => {
         // Afficher les informations du département sélectionné dans la div contenaire
         const contenaireDiv = document.getElementById("contenaire");
         await showDepartmentInfo(selectedDepartmentId, departmentsRef, contenaireDiv);
+        await showCommunesList(selectedDepartmentId, departmentsRef, contenaireDiv);
+
+        //MODIFIER selectedDepartmentId car ce n'est pas le bon numéro!!!
+        const filteredCommunes = await loadCommunes(regionInsee);
+
+        // Initialiser geoJSONLayerCommune avec le style et les fonctions onEachFeature
+        geoJSONLayerCommune = L.geoJSON(null, {
+            style: styleCommunes,
+            onEachFeature: onEachFeatureCommunes
+        }).addTo(map);
+        geoJSONLayerCommune.setZIndex(3);
+
+        // Ajouter les données à geoJSONLayerCommune
+        filteredCommunes.forEach(commune => {
+            geoJSONLayerCommune.addData(commune);
+        });
     });
+
 
     return select;
 };
@@ -386,6 +410,155 @@ export const showRegionsListAdmin = async() => {
         const contenaireDiv = document.getElementById("contenaire");
         contenaireDiv.innerHTML = "Une erreur s'est produite lors de la récupération des régions.";
     }
+};
+
+async function loadAllCommunes(regionCode) {
+    const response = await fetch(`./data/communes_${regionCode}.geojson`);
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+
+    const communesData = await response.json();
+    // console.log(communesData);
+    const filteredCommunes = [];
+    communesData.features.forEach((feature) => {
+        // if (feature.properties.COMMUNE_MAYANE === "TRUE") {
+        filteredCommunes.push(feature);
+        // }
+    });
+    return filteredCommunes;
+}
+
+const showCommunesList = async(selectedDepartmentId, departmentsRef, contenaireDiv) => {
+    // Récupérer le département sélectionné
+    const selectedDepartmentSnapshot = await getDoc(doc(departmentsRef, selectedDepartmentId));
+    const selectedDepartment = selectedDepartmentSnapshot.data();
+    selectedDepartment.id = selectedDepartmentSnapshot.id;
+
+    // Supprimer les anciennes informations des communes
+    const communesListDiv = document.querySelector('.communes-list');
+    if (communesListDiv) {
+        communesListDiv.remove();
+    }
+
+    // Créer l'élément select pour les communes
+    const select = document.createElement('select');
+    select.className = 'form-select form-select-sm mb-3';
+
+    try {
+        // Charger les communes du département
+        const communesData = await loadAllCommunes(selectedDepartment.INSEE_REG);
+
+        // Récupérer les communes TRUE dans Firebase
+        const mayaneCommunes = await getMayaneCommunes(selectedDepartment.INSEE_DEP);
+
+        // Trier les communes par nom (ordre alphabétique)
+        const sortedCommunesData = communesData.sort((a, b) =>
+            a.properties.NOM_COM_M.localeCompare(b.properties.NOM_COM_M)
+        );
+
+        sortedCommunesData.forEach((commune) => {
+            const option = document.createElement('option');
+            option.textContent = commune.properties.NOM_COM_M;
+            option.value = commune.properties.INSEE_COM;
+
+            const isMayaneCommune = mayaneCommunes.some((mayaneCommune) => mayaneCommune.INSEE_COM === commune.properties.INSEE_COM);
+
+            if (isMayaneCommune) {
+                option.classList.add('mayane-commune');
+            }
+
+            select.appendChild(option);
+        });
+
+        // Ajouter l'élément select à la div contenaire
+        contenaireDiv.appendChild(select);
+
+        // Ajouter un écouteur d'événement "change" à l'élément select
+        select.addEventListener('change', async(event) => {
+            const selectedCommuneId = event.target.value;
+            const selectedCommune = sortedCommunesData.find(
+                (commune) => commune.properties.INSEE_COM === selectedCommuneId
+            );
+            showCommuneInfo(selectedCommune.properties);
+
+            // Vérifier si la commune sélectionnée est TRUE dans Firebase
+            // const isMayaneCommune = mayaneCommunes.some(
+            //     (mayaneCommune) => mayaneCommune.INSEE_COM === selectedCommuneId
+            // );
+
+            // Ajouter les communes sélectionnées sur la carte
+            // geoJSONLayerCommune.clearLayers();
+            // if (isMayaneCommune) {
+            //     geoJSONLayerCommune.addData(selectedCommune);
+            // }
+        });
+    } catch (error) {
+        console.error('Erreur lors du chargement des communes', error);
+        const errorMessage = document.createElement('p');
+        errorMessage.textContent = "Une erreur s'est produite lors du chargement des communes.";
+        contenaireDiv.appendChild(errorMessage);
+    }
+};
+
+const showCommuneInfo = (commune) => {
+    // Récupérer le conteneur pour afficher les informations de la commune
+    const communeInfoDiv = document.getElementById('commune-info');
+
+    let titreComm = document.getElementById('nom-comm');
+    titreComm.textContent = commune.NOM_COM_M;
+
+    let croixElt = document.getElementById('croix');
+    croixElt.addEventListener('click', function() {
+        panneauComm.classList.remove('down');
+    });
+
+    // Récupérer les colonnes existantes
+    const leftColumnDiv = document.getElementById('column-1');
+    const middleColumnDiv = document.getElementById('column-2');
+    const rightColumnDiv = document.getElementById('column-3');
+
+    // Supprimer le contenu des colonnes existantes
+    leftColumnDiv.innerHTML = '';
+    middleColumnDiv.innerHTML = '';
+    rightColumnDiv.innerHTML = '';
+
+    // Parcourir les propriétés de la commune et afficher les informations
+    for (const key in commune) {
+        if (Object.hasOwnProperty.call(commune, key)) {
+            const span = document.createElement('span');
+            span.classList.add('property-name');
+            span.textContent = `${key}:`;
+
+            // Créer un span pour regrouper le p et l'input
+            const pElt = document.createElement('p');
+            // pElt.style.display = 'flex'; // Utiliser flex pour aligner les éléments sur la même ligne
+
+            // Créer un input pour la propriété
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = commune[key];
+            input.addEventListener('change', (event) => {
+                commune[key] = event.target.value;
+            });
+
+            // Ajouter le p et l'input au pElt
+            pElt.appendChild(span);
+            pElt.appendChild(input);
+
+            // Ajouter le pElt à la colonne correspondante
+            if (Object.keys(commune).indexOf(key) < Object.keys(commune).length / 3) {
+                leftColumnDiv.appendChild(pElt);
+            } else if (Object.keys(commune).indexOf(key) < (Object.keys(commune).length / 3) * 2) {
+                middleColumnDiv.appendChild(pElt);
+            } else {
+                rightColumnDiv.appendChild(pElt);
+            }
+        }
+    }
+
+    let panneauComm = document.getElementById('panneau-communes');
+    panneauComm.classList.add('down');
 };
 
 export { isConnected };

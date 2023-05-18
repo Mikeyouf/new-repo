@@ -163,6 +163,14 @@ function displayCommuneInfo(commune) {
     let titreComm = document.getElementById('nom-comm');
     let communeInfoDiv = document.getElementById('commune-info');
 
+    // Vérifier si la div commune-info contient déjà une div de classe "row"
+    const existingRowDiv = communeInfoDiv.querySelector('.row');
+    if (existingRowDiv) {
+        // Si une div de classe "row" existe, la supprimer
+        console.log("communeInfoDiv has childs");
+        communeInfoDiv.removeChild(existingRowDiv);
+    }
+
     let croixElt = document.getElementById('croix');
     croixElt.addEventListener('click', function() {
         panneauComm.classList.remove('down');
@@ -197,7 +205,9 @@ function displayCommuneInfo(commune) {
     for (const columnId of Object.values(columnAssignments)) {
         const columnDiv = document.getElementById(columnId);
         if (columnDiv) {
-            columnDiv.innerHTML = '';
+            while (columnDiv.firstChild) {
+                columnDiv.removeChild(columnDiv.firstChild);
+            }
         }
     }
 
@@ -345,4 +355,4 @@ async function showCommunesList(regionCode, departmentINSEE, departmentName) {
 }
 
 
-export { getMayaneCommunes, showCommunesList, geoJSONLayerCommune };
+export { getMayaneCommunes, showCommunesList, geoJSONLayerCommune, loadCommunes, getCurrentZoom, styleCommunes, onEachFeatureCommunes };

@@ -89,6 +89,10 @@ body {
     color: #3F89B6;
 }
 
+.mayane-commune {
+    font-weight: bold;
+}
+
 #commune-info {
     border-top: 1px solid #3F89B6;
     padding-top: 8px;
